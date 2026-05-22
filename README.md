@@ -3,7 +3,9 @@
 A clean, hybrid live-preview Markdown editor for Windows, macOS, and Linux.
 Built with Electron + React + CodeMirror 6.
 
-![Framora screenshot](resources/screenshot.png)
+![Framora — live preview editor](resources/screenshot.png)
+
+![Framora — 1 000-template picker](resources/screenshot-templates.png)
 
 ## Features
 
@@ -21,12 +23,65 @@ Built with Electron + React + CodeMirror 6.
 - **Standalone Preview** — full markdown-it render with Mermaid diagrams, syntax
   highlighting, and math (KaTeX / MathJax).
 
+### AI Assistant (100 % local — no cloud, no API key)
+
+Framora ships a built-in AI writing assistant powered by [dlgo](https://github.com/computerex/dlgo),
+a lightweight local LLM inference server. Everything runs on your machine: no data ever leaves
+your device.
+
+**Setup:** drop a GGUF model file anywhere on disk, point Framora to it in Settings → AI, and
+the assistant becomes available. GPU acceleration (Vulkan) is used automatically when available;
+falls back to CPU.
+
+**AI Panel** (click the ✦ AI button or press the shortcut):
+
+| Mode | What it does |
+|---|---|
+| **Continue Writing** | Generates the next paragraph from the last few lines of context |
+| **Insert Table** | Builds a GFM table for the topic at the cursor |
+| **Insert List** | Generates a bulleted or numbered list |
+| **Insert Diagram** | Writes a Mermaid diagram block |
+| **Insert Code** | Generates a fenced code block |
+| **Summarize** | Summarizes the full document or selection |
+| **Fix Grammar** | Corrects spelling & grammar in the selected text |
+| **Improve Writing** | Rewrites selection for clarity and flow |
+| **Make Concise** | Shortens the selection without losing meaning |
+| **Change Tone** | Adjusts the tone of selected text (formal, casual, etc.) |
+| **Remove Secrets** | Strips API keys, tokens, and hex strings from selected text |
+| **Ask anything** | Free-form chat prompt with full document context awareness |
+
+Edit tasks show a **before / after diff** so you can review changes before applying them.
+Generate tasks stream tokens in real time and can be aborted at any time.
+
+Context is always minimal and surgical — headings, current section, and cursor position are
+sent rather than the whole document, so even small local models perform well.
+
 ### Editor
 
 - CodeMirror 6 with full keyboard navigation
 - Focus mode (dim non-active lines)
 - Word / char / line count in status bar
 - Light / dark theme that follows the OS
+
+### Template Library (1 000 templates)
+
+Framora ships 1 000 ready-to-use Markdown templates across 11 categories — open the template
+picker from **File → New from Template** (or the welcome screen) to browse, search, and preview
+before inserting.
+
+| Category | Count |
+|---|---|
+| Academic | 80 |
+| Business | 120 |
+| Communication | 80 |
+| Data | 70 |
+| Development | 150 |
+| Legal & Compliance | 50 |
+| Personal | 80 |
+| Project Management | 80 |
+| Snippets | 70 |
+| Technical Docs | 120 |
+| Writing | 100 |
 
 ### File handling
 
