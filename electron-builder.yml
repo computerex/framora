@@ -1,0 +1,86 @@
+appId: io.framora.app
+productName: Framora
+copyright: Copyright © 2025 Framora
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**/*
+  - package.json
+extraResources:
+  - from: ../dlgo-bin/
+    to: .
+    filter:
+      - "dlgo-server-gpu.exe"
+      - "dlgo-server-cpu.exe"
+      - "dlgo.exe"
+  - from: templates/
+    to: templates
+    filter:
+      - "**/*"
+asarUnpack:
+  - resources/**
+
+fileAssociations:
+  - ext: md
+    name: Markdown Document
+    description: Markdown Document
+    role: Editor
+  - ext: markdown
+    name: Markdown Document
+    role: Editor
+  - ext: mdown
+    name: Markdown Document
+    role: Editor
+  - ext: mkd
+    name: Markdown Document
+    role: Editor
+  - ext: mkdn
+    name: Markdown Document
+    role: Editor
+  - ext: qmd
+    name: Quarto Markdown
+    role: Editor
+
+mac:
+  category: public.app-category.productivity
+  icon: resources/icon.icns
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  hardenedRuntime: true
+  gatekeeperAssess: false
+
+win:
+  icon: resources/icon.ico
+  target:
+    - target: nsis
+      arch: [x64, arm64, ia32]
+    - target: portable
+      arch: [x64]
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Framora
+
+linux:
+  icon: resources/icons
+  category: Office
+  synopsis: A clean, hybrid live-preview Markdown editor
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+    - target: tar.gz
+      arch: [x64, arm64]
+
+publish:
+  provider: github
+  releaseType: release

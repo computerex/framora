@@ -1,0 +1,118 @@
+/* ==========================================================
+   Framora — context menu, lightbox, table editor visuals
+   ========================================================== */
+
+/* ---------- Context menu ---------- */
+.fr-ctxmenu {
+  position: fixed;
+  z-index: 1100;
+  min-width: 180px;
+  background: var(--fr-bg);
+  color: var(--fr-fg);
+  border: 1px solid var(--fr-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 4px 0;
+  font-size: 13px;
+  user-select: none;
+}
+.fr-ctxmenu-item {
+  position: relative;
+  padding: 5px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.fr-ctxmenu-item:hover:not(.disabled) { background: var(--fr-selection); }
+.fr-ctxmenu-item.disabled { color: var(--fr-fg-muted); cursor: default; }
+.fr-ctxmenu-arrow { font-size: 10px; color: var(--fr-fg-muted); }
+.fr-ctxmenu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--fr-border);
+}
+.fr-ctxmenu-item.has-submenu:hover .fr-ctxmenu-sub { display: block; }
+.fr-ctxmenu-sub {
+  display: none;
+  position: absolute;
+  left: 100%;
+  top: -4px;
+  min-width: 140px;
+  background: var(--fr-bg);
+  border: 1px solid var(--fr-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  padding: 4px 0;
+}
+
+/* ---------- Lightbox ---------- */
+.fr-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  cursor: zoom-out;
+}
+.fr-lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  cursor: grab;
+}
+.fr-lightbox-toolbar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(40, 40, 40, 0.85);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: default;
+}
+.fr-lightbox-toolbar button {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.fr-lightbox-toolbar button:hover { background: rgba(255, 255, 255, 0.15); }
+
+/* ---------- Table cell hover hint (signals right-click) ---------- */
+.fr-rendered table th,
+.fr-rendered table td {
+  position: relative;
+  transition: background 0.1s;
+}
+.fr-rendered table tr:hover td,
+.fr-rendered table tr:hover th {
+  background: var(--fr-code-bg);
+}
+
+/* ---------- Drag-drop overlay (subtle) ---------- */
+.framora-root.dragging::after {
+  content: 'Drop to insert';
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 125, 255, 0.08);
+  border: 4px dashed var(--fr-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--fr-accent);
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 999;
+}

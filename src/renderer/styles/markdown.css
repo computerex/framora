@@ -1,0 +1,155 @@
+/* ==========================================================
+   Framora — markdown content styles
+   ========================================================== */
+
+/* KaTeX styles + highlight.js light theme.  Dark-mode overrides
+   for code blocks are provided manually below. */
+@import 'katex/dist/katex.min.css';
+@import 'highlight.js/styles/github.css';
+
+/* Dark-mode code highlighting — keyed off data-theme, not OS preference */
+:root[data-theme="dark"] .hljs            { color: #e6edf3; background: #2a2c30; }
+:root[data-theme="dark"] .hljs-doctag,
+:root[data-theme="dark"] .hljs-keyword,
+:root[data-theme="dark"] .hljs-meta .hljs-keyword,
+:root[data-theme="dark"] .hljs-template-tag,
+:root[data-theme="dark"] .hljs-template-variable,
+:root[data-theme="dark"] .hljs-type,
+:root[data-theme="dark"] .hljs-variable.language_      { color: #ff7b72; }
+:root[data-theme="dark"] .hljs-title,
+:root[data-theme="dark"] .hljs-title.class_,
+:root[data-theme="dark"] .hljs-title.class_.inherited__,
+:root[data-theme="dark"] .hljs-title.function_         { color: #d2a8ff; }
+:root[data-theme="dark"] .hljs-attr,
+:root[data-theme="dark"] .hljs-attribute,
+:root[data-theme="dark"] .hljs-literal,
+:root[data-theme="dark"] .hljs-meta,
+:root[data-theme="dark"] .hljs-number,
+:root[data-theme="dark"] .hljs-operator,
+:root[data-theme="dark"] .hljs-variable,
+:root[data-theme="dark"] .hljs-selector-attr,
+:root[data-theme="dark"] .hljs-selector-class,
+:root[data-theme="dark"] .hljs-selector-id             { color: #79c0ff; }
+:root[data-theme="dark"] .hljs-string,
+:root[data-theme="dark"] .hljs-meta .hljs-string,
+:root[data-theme="dark"] .hljs-regexp                  { color: #a5d6ff; }
+:root[data-theme="dark"] .hljs-built_in,
+:root[data-theme="dark"] .hljs-symbol                  { color: #ffa657; }
+:root[data-theme="dark"] .hljs-comment,
+:root[data-theme="dark"] .hljs-code,
+:root[data-theme="dark"] .hljs-formula                 { color: #8b949e; }
+:root[data-theme="dark"] .hljs-name,
+:root[data-theme="dark"] .hljs-quote,
+:root[data-theme="dark"] .hljs-selector-tag,
+:root[data-theme="dark"] .hljs-selector-pseudo         { color: #7ee787; }
+:root[data-theme="dark"] .hljs-subst                   { color: #e6edf3; }
+:root[data-theme="dark"] .hljs-section                 { color: #1f6feb; font-weight: bold; }
+:root[data-theme="dark"] .hljs-bullet                  { color: #f2cc60; }
+:root[data-theme="dark"] .hljs-emphasis                { color: #e6edf3; font-style: italic; }
+:root[data-theme="dark"] .hljs-strong                  { color: #e6edf3; font-weight: bold; }
+:root[data-theme="dark"] .hljs-addition                { color: #aff5b4; background: #033a16; }
+:root[data-theme="dark"] .hljs-deletion                { color: #ffdcd7; background: #67060c; }
+
+/* ---------- Math ---------- */
+.fr-math-block {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+.fr-math-error,
+.fr-mermaid-error {
+  color: #c0392b;
+  font-family: var(--fr-font-mono);
+  font-size: 0.9em;
+  background: #fdecea;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+:root[data-theme="dark"] .fr-math-error,
+:root[data-theme="dark"] .fr-mermaid-error {
+  background: #3a1f1f;
+  color: #ff8a80;
+}
+
+/* ---------- Mermaid ---------- */
+.fr-mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+.fr-mermaid svg { max-width: 100%; height: auto; }
+
+/* ---------- Code blocks (overrides hljs theme padding) ---------- */
+.fr-rendered pre.hljs {
+  padding: 14px 16px;
+  border-radius: 6px;
+  font-size: 0.88em;
+  line-height: 1.55;
+  font-family: var(--fr-font-mono);
+}
+
+/* ---------- GitHub-style alerts / callouts ---------- */
+.fr-rendered blockquote.fr-alert {
+  border-left-width: 4px;
+  border-left-style: solid;
+  background: var(--fr-code-bg);
+  border-radius: 0 6px 6px 0;
+  margin: 1em 0;
+  padding: 0.6em 1em;
+  font-style: normal;
+  color: inherit;
+}
+.fr-alert-title {
+  font-weight: 600;
+  margin: 0 0 0.4em !important;
+  font-size: 0.95em;
+}
+.fr-alert-note      { border-left-color: #4a7dff; }
+.fr-alert-note      .fr-alert-title { color: #4a7dff; }
+.fr-alert-tip       { border-left-color: #2ea043; }
+.fr-alert-tip       .fr-alert-title { color: #2ea043; }
+.fr-alert-important { border-left-color: #8957e5; }
+.fr-alert-important .fr-alert-title { color: #8957e5; }
+.fr-alert-warning   { border-left-color: #d29922; }
+.fr-alert-warning   .fr-alert-title { color: #d29922; }
+.fr-alert-caution   { border-left-color: #d73a49; }
+.fr-alert-caution   .fr-alert-title { color: #d73a49; }
+
+/* ---------- Task lists ---------- */
+.fr-rendered .task-list-item { list-style: none; }
+.fr-rendered .task-list-item > input[type="checkbox"] {
+  margin: 0 8px 0 -22px;
+  vertical-align: middle;
+}
+
+/* ---------- Footnotes ---------- */
+.fr-rendered .footnotes {
+  font-size: 0.88em;
+  border-top: 1px solid var(--fr-border);
+  margin-top: 2em;
+  padding-top: 1em;
+  color: var(--fr-fg-muted);
+}
+
+/* ---------- Anchor permalinks ---------- */
+.fr-rendered .header-anchor {
+  text-decoration: none;
+  color: inherit;
+}
+.fr-rendered .header-anchor:hover { color: var(--fr-accent); }
+
+/* ---------- Definition lists ---------- */
+.fr-rendered dl { margin: 1em 0; }
+.fr-rendered dt { font-weight: 600; margin-top: 0.6em; }
+.fr-rendered dd { margin: 0 0 0 1.5em; }
+
+/* ---------- Mark / sub / sup ---------- */
+.fr-rendered mark {
+  background: #fff59d;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+:root[data-theme="dark"] .fr-rendered mark { background: #524a17; color: #fff8c5; }
