@@ -3,23 +3,42 @@
 A clean, hybrid live-preview Markdown editor for Windows, macOS, and Linux.
 Built with Electron + React + CodeMirror 6.
 
-## What works in M1 (this milestone)
+## Features
 
-- Native Electron app, single-instance
+### Live Preview (Obsidian / Typora-style)
+
+- **Ghost-tag editing** — markdown syntax markers (`**`, `#`, `>`, `` ` ``) are hidden on
+  lines the cursor isn't on and rendered in-place as styled text. Move to a line and the
+  ghost markers reappear so you can edit them directly.
+- **Inline formatting** — bold, italic, strikethrough, inline code, headings (H1–H6),
+  blockquotes, and links all render styled in the editor without leaving edit mode.
+- **Table rendering** — GFM tables render as real bordered grid tables with aligned
+  columns and header styling. Click any cell to drop the cursor right into that cell's
+  source for editing; click elsewhere to snap back to the rendered view.
+- **Source-mode toggle** — show line numbers and all raw markers at any time.
+- **Standalone Preview** — full markdown-it render with Mermaid diagrams, syntax
+  highlighting, and math (KaTeX / MathJax).
+
+### Editor
+
+- CodeMirror 6 with full keyboard navigation
+- Focus mode (dim non-active lines)
+- Word / char / line count in status bar
+- Light / dark theme that follows the OS
+
+### File handling
+
 - Open / Save / Save As `.md` files
 - File associations for `.md`, `.markdown`, `.mdown`, `.mkd`, `.mkdn`, `.qmd`
-  — double-clicking these in your OS opens them in Framora once installed
-- Recent files (persisted to user data dir)
-- CodeMirror 6 markdown editor with:
-  - Hybrid live-render decorations (heading sizes, blockquote styling,
-    code-block backgrounds, marker tokens hidden when cursor isn't on them)
-  - Source-mode toggle (line numbers + raw markers visible)
-  - Standalone Preview mode (markdown-it render)
-- Focus mode (dim non-active lines)
-- Light / dark theme that follows OS
-- Status bar (filename, dirty marker, words, chars, lines)
-- Native menubar (File / Edit / View / Window / Help)
+  — double-clicking these opens them in Framora once installed
+- Recent files (persisted across sessions)
 - Welcome screen with recents
+
+### Shell
+
+- Native Electron app, single-instance
+- Native menubar (File / Edit / View / Window / Help)
+- Status bar (filename, dirty marker, words, chars, lines)
 
 ## Dev
 
@@ -62,12 +81,12 @@ resources/icons/*.png      Linux  (16/32/48/64/128/256/512)
 
 ## Roadmap
 
-See `../framora.md` (the milestones plan) — M2 brings hybrid-rendered
-images, tables, math (MathJax), Mermaid diagrams, and code-fence
-syntax highlighting via Shiki. M3+ add file tree sidebar, global search,
-exports (PDF/HTML/docx/epub via bundled Pandoc), themes engine, and
-auto-update.
+- **M2** — Mermaid diagrams in live preview, math (KaTeX), code-fence syntax highlighting
+  via Shiki, image rendering
+- **M3** — File-tree sidebar, global search, exports (PDF / HTML / docx / epub via
+  bundled Pandoc), themes engine
+- **M4** — Auto-update, command palette, vim keybindings, plugin API
 
 ## License
 
-MIT (your choice — update before publishing).
+MIT
