@@ -3,6 +3,8 @@
 A clean, hybrid live-preview Markdown editor for Windows, macOS, and Linux.
 Built with Electron + React + CodeMirror 6.
 
+![Framora screenshot](resources/screenshot.png)
+
 ## Features
 
 ### Live Preview (Obsidian / Typora-style)
