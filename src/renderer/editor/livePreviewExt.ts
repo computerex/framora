@@ -329,12 +329,9 @@ function buildDecorations(view: EditorView): BuiltDecorations {
     syntaxTree(view.state).iterate({
       from,
       to,
-      enter: (node) => {
-        const name = node.name;
+      enter: (node) => {        const name = node.name;
 
-        // ---- Tables are handled by a dedicated extension (tableExt.ts) ----
-        // We skip the whole subtree here so this plugin doesn't fight the
-        // table StateField's block decorations.
+        // ---- Tables handled by tableExt.ts ----
         if (name === 'Table') {
           replacedTables.push({ from: node.from, to: node.to });
           return false;
@@ -343,7 +340,7 @@ function buildDecorations(view: EditorView): BuiltDecorations {
         void blockRanges;
         void isTableActive;
 
-        // Block-level: heading container → add class for whole range
+        // Block-level headings
         if (headingClass[name]) {
           inlineRanges.push(
             Decoration.mark({ class: headingClass[name] }).range(node.from, node.to)
@@ -351,7 +348,7 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // Inline formatting containers → add class
+        // Inline formatting containers (bold, italic, code, strikethrough)
         if (inlineClass[name]) {
           if (node.from < node.to) {
             inlineRanges.push(
@@ -361,45 +358,22 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // ---- Links: styled display text + hidden syntax when inactive ----
+        // ---- Links ----
+        // Apply fr-lp-link to the whole range on every line.
+        // Children (LinkMark, URL) are still visited so they get hidden or
+        // ghost-styled by the handlers below.
         if (name === 'Link') {
-          if (!isActiveLine(node.from)) {
-            const src = view.state.doc.sliceString(node.from, node.to);
-            const link = parseLinkSrc(src);
-            if (link) {
-              // hide "["
-              const textStart = node.from + 1;
-              const textEnd   = node.from + 1 + link.display.length;
-              const r1 = hideDeco.range(node.from, textStart);
-              inlineRanges.push(r1);
-              atomicRanges.push(r1);
-              // mark only the visible display text
-              if (textStart < textEnd) {
-                inlineRanges.push(
-                  Decoration.mark({ class: 'fr-lp-link' }).range(textStart, textEnd)
-                );
-              }
-              // hide "](url)"
-              if (textEnd < node.to) {
-                const r3 = hideDeco.range(textEnd, node.to);
-                inlineRanges.push(r3);
-                atomicRanges.push(r3);
-              }
-            }
-            return false; // don't visit children
-          } else {
-            // Active line: show raw markdown with link colour + ghost children
+          if (node.from < node.to) {
             inlineRanges.push(
               Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
             );
           }
-          return;
+          return; // visit children
         }
 
-        // Marker tokens (the * # ` etc.) → hide unless the line is active
+        // Marker tokens (**, #, `, ~~, [], () …) → hide when not on active line
         if (hideMarkerNames.has(name)) {
           if (!isActiveLine(node.from)) {
-            // For HeaderMark also eat the trailing space after it
             let end = node.to;
             if (name === 'HeaderMark') {
               const ch = view.state.doc.sliceString(end, end + 1);
@@ -411,7 +385,6 @@ function buildDecorations(view: EditorView): BuiltDecorations {
               atomicRanges.push(r);
             }
           } else {
-            // Show as ghost on the active line
             inlineRanges.push(
               Decoration.mark({ class: 'fr-lp-ghost' }).range(node.from, node.to)
             );
@@ -419,21 +392,7 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // Hide URL part of links when not on active line: [text](url)
-        if (name === 'URL') {
-          if (!isActiveLine(node.from)) {
-            const r = hideDeco.range(node.from, node.to);
-            inlineRanges.push(r);
-            atomicRanges.push(r);
-          } else {
-            inlineRanges.push(
-              Decoration.mark({ class: 'fr-lp-ghost' }).range(node.from, node.to)
-            );
-          }
-          return;
-        }
-
-        // Fenced code: style block
+        // Fenced code blocks
         if (name === 'FencedCode') {
           inlineRanges.push(
             Decoration.mark({ class: 'fr-lp-fenced' }).range(node.from, node.to)
