@@ -290,57 +290,41 @@ interface BuiltDecorations {
   atomic: DecorationSet;
 }
 
-function buildDecorations(view: EditorView): BuiltDecorations {
-  const inlineRanges: Array<Range<Decoration>> = [];
+function buildDecorations(view: EditorView): BuiltDecorations {  const inlineRanges: Array<Range<Decoration>> = [];
   const blockRanges: Array<Range<Decoration>> = [];
   const atomicRanges: Array<Range<Decoration>> = [];
 
-  // Determine all "active" lines: any line that intersects a selection range.
   const activeLines = new Set<number>();
   for (const r of view.state.selection.ranges) {
     const from = view.state.doc.lineAt(r.from).number;
-    const to = view.state.doc.lineAt(r.to).number;
+    const to   = view.state.doc.lineAt(r.to).number;
     for (let i = from; i <= to; i++) activeLines.add(i);
   }
 
   const isActiveLine = (pos: number): boolean =>
     activeLines.has(view.state.doc.lineAt(pos).number);
 
-  const isTableActive = (from: number, to: number): boolean => {
-    const first = view.state.doc.lineAt(from).number;
-    const last = view.state.doc.lineAt(Math.min(to, view.state.doc.length)).number;
-    for (let i = first; i <= last; i++) {
-      if (activeLines.has(i)) return true;
-    }
-    return false;
-  };
+  void blockRanges; // reserved for future block-level decorations
 
-  // Tracks Table ranges that we've already replaced as a block widget, so the
-  // iterate callback knows to skip styling decorations inside them.
   const replacedTables: Array<{ from: number; to: number }> = [];
-  const insideReplacedTable = (pos: number): boolean => {
-    for (const t of replacedTables) {
-      if (pos >= t.from && pos < t.to) return true;
-    }
-    return false;
-  };
+  const insideReplacedTable = (pos: number): boolean =>
+    replacedTables.some((t) => pos >= t.from && pos < t.to);
 
   for (const { from, to } of view.visibleRanges) {
     syntaxTree(view.state).iterate({
       from,
       to,
-      enter: (node) => {        const name = node.name;
+      enter: (node) => {
+        const name = node.name;
 
-        // ---- Tables handled by tableExt.ts ----
+        // Tables are handled by tableExt.ts — skip entire subtree.
         if (name === 'Table') {
           replacedTables.push({ from: node.from, to: node.to });
           return false;
         }
         if (insideReplacedTable(node.from)) return false;
-        void blockRanges;
-        void isTableActive;
 
-        // Block-level headings
+        // Headings
         if (headingClass[name]) {
           inlineRanges.push(
             Decoration.mark({ class: headingClass[name] }).range(node.from, node.to)
@@ -348,7 +332,7 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // Inline formatting containers (bold, italic, code, strikethrough)
+        // Bold, italic, inline-code, strikethrough
         if (inlineClass[name]) {
           if (node.from < node.to) {
             inlineRanges.push(
@@ -358,20 +342,48 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // ---- Links ----
-        // Apply fr-lp-link to the whole range on every line.
-        // Children (LinkMark, URL) are still visited so they get hidden or
-        // ghost-styled by the handlers below.
+        // Links — three strictly non-overlapping ranges on inactive lines so
+        // CM6's RangeSetBuilder never sees a mark and a replace at the same `from`.
         if (name === 'Link') {
-          if (node.from < node.to) {
-            inlineRanges.push(
-              Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
-            );
+          if (!isActiveLine(node.from)) {
+            const src  = view.state.doc.sliceString(node.from, node.to);
+            const link = parseLinkSrc(src);
+            if (link) {
+              const textStart = node.from + 1;                         // after "["
+              const textEnd   = node.from + 1 + link.display.length;  // before "]"
+
+              // 1. hide "["
+              const r1 = hideDeco.range(node.from, textStart);
+              inlineRanges.push(r1);
+              atomicRanges.push(r1);
+
+              // 2. style the display text
+              if (textStart < textEnd) {
+                inlineRanges.push(
+                  Decoration.mark({ class: 'fr-lp-link' }).range(textStart, textEnd)
+                );
+              }
+
+              // 3. hide "](url)"
+              if (textEnd < node.to) {
+                const r3 = hideDeco.range(textEnd, node.to);
+                inlineRanges.push(r3);
+                atomicRanges.push(r3);
+              }
+            }
+            return false; // skip children — we handled everything above
+          } else {
+            // Active line: full raw markdown in link colour; children get ghost marks
+            if (node.from < node.to) {
+              inlineRanges.push(
+                Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
+              );
+            }
+            return; // visit children so LinkMark/URL get ghost styling
           }
-          return; // visit children
         }
 
-        // Marker tokens (**, #, `, ~~, [], () …) → hide when not on active line
+        // Marker tokens (**, #, `, ~~, [, ], (, ) …)
         if (hideMarkerNames.has(name)) {
           if (!isActiveLine(node.from)) {
             let end = node.to;
@@ -392,6 +404,31 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
+        // URL node inside a Link/Image → hide on inactive lines.
+        // Standalone GFM autolink URLs (parent = Paragraph) → style as link.
+        if (name === 'URL') {
+          const parentName = node.node.parent?.name;
+          if (parentName === 'Link' || parentName === 'Image') {
+            if (!isActiveLine(node.from)) {
+              const r = hideDeco.range(node.from, node.to);
+              inlineRanges.push(r);
+              atomicRanges.push(r);
+            } else {
+              inlineRanges.push(
+                Decoration.mark({ class: 'fr-lp-ghost' }).range(node.from, node.to)
+              );
+            }
+          } else {
+            // Standalone autolink — always visible, styled as a link
+            if (node.from < node.to) {
+              inlineRanges.push(
+                Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
+              );
+            }
+          }
+          return;
+        }
+
         // Fenced code blocks
         if (name === 'FencedCode') {
           inlineRanges.push(
@@ -403,7 +440,7 @@ function buildDecorations(view: EditorView): BuiltDecorations {
     });
   }
 
-  // Decorations must be sorted by `from`, then by `startSide`.
+  // Decorations must be sorted by `from`, then by `startSide`.  // Decorations must be sorted by `from`, then by `startSide`.
   const sortFn = (a: Range<Decoration>, b: Range<Decoration>): number =>
     a.from - b.from || a.value.startSide - b.value.startSide;
   inlineRanges.sort(sortFn);
