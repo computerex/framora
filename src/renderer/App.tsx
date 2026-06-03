@@ -32,6 +32,9 @@ const EMPTY: DocState = { path: null, content: '', dirty: false };
 
 export function App(): JSX.Element {
   const [doc, setDoc] = useState<DocState>(EMPTY);
+  // true once the user has explicitly opened/created a document; prevents
+  // the Welcome screen from re-appearing when all content is deleted.
+  const [docActive, setDocActive] = useState(false);
   const [mode, setMode] = useState<ViewMode>('live');
   const [focusMode, setFocusMode] = useState(false);
   const [folder, setFolder] = useState<FolderState | null>(null);
@@ -71,10 +74,11 @@ export function App(): JSX.Element {
   useEffect(() => {
     const off = window.framora.onFileOpened((f) => {
       setDoc({ path: f.path, content: f.content, dirty: false });
+      setDocActive(true);
     });
     // Pull any file that the main process queued for this window at creation
     void window.framora.pullPendingFile().then((f) => {
-      if (f) setDoc({ path: f.path, content: f.content, dirty: false });
+      if (f) { setDoc({ path: f.path, content: f.content, dirty: false }); setDocActive(true); }
     });
     return off;
   }, []);
@@ -138,7 +142,7 @@ export function App(): JSX.Element {
   const openFile = useCallback(async () => {
     if (!(await promptSaveIfDirty())) return;
     const f = await window.framora.openDialog();
-    if (f) setDoc({ path: f.path, content: f.content, dirty: false });
+    if (f) { setDoc({ path: f.path, content: f.content, dirty: false }); setDocActive(true); }
   }, [promptSaveIfDirty]);
 
   const openFolder = useCallback(async () => {
@@ -160,6 +164,7 @@ export function App(): JSX.Element {
       if (!(await promptSaveIfDirty())) return;
       const f = await window.framora.readFile(path);
       setDoc({ path: f.path, content: f.content, dirty: false });
+      setDocActive(true);
     },
     [promptSaveIfDirty]
   );
@@ -240,6 +245,7 @@ body { margin: 0; padding: 24px 32px; font-family: -apple-system, BlinkMacSystem
     async (content: string) => {
       if (doc.dirty && !(await promptSaveIfDirty())) return;
       setDoc({ path: null, content, dirty: true });
+      setDocActive(true);
       setTemplatePickerOpen(false);
     },
     [doc.dirty, promptSaveIfDirty]
@@ -393,7 +399,7 @@ body { margin: 0; padding: 24px 32px; font-family: -apple-system, BlinkMacSystem
     document.addEventListener('mouseup', onUp);
   }, [splitPercent]);
 
-  const isEmpty = doc.path === null && doc.content === '' && !folder;
+  const isEmpty = !docActive && doc.path === null && doc.content === '' && !folder;
 
   return (
     <I18nProvider value={messages}>
@@ -449,11 +455,12 @@ body { margin: 0; padding: 24px 32px; font-family: -apple-system, BlinkMacSystem
           {isEmpty ? (
             <Welcome
               onOpen={openFile}
-              onNew={() => setDoc({ path: null, content: '# \n', dirty: true })}
+              onNew={() => { setDoc({ path: null, content: '# \n', dirty: true }); setDocActive(true); }}
               onBrowseTemplates={openTemplatePicker}
               onOpenRecent={(p) => {
                 void window.framora.readFile(p).then((f) => {
                   setDoc({ path: f.path, content: f.content, dirty: false });
+                  setDocActive(true);
                 }).catch(() => {
                   // File may have been deleted since last session
                 });

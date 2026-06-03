@@ -361,28 +361,37 @@ function buildDecorations(view: EditorView): BuiltDecorations {
           return;
         }
 
-        // ---- Links: widget when inactive, raw + ghost when active ----
+        // ---- Links: styled display text + hidden syntax when inactive ----
         if (name === 'Link') {
           if (!isActiveLine(node.from)) {
-            // Replace the entire [text](url) span with a rendered anchor.
-            // Using a widget replacement avoids the CM6 overlap issue where
-            // mixing mark + replace decorations on the same range silently
-            // discards the visible text.
             const src = view.state.doc.sliceString(node.from, node.to);
             const link = parseLinkSrc(src);
             if (link) {
-              inlineRanges.push(
-                Decoration.replace({ widget: new LinkWidget(link.display, link.href) })
-                  .range(node.from, node.to)
-              );
+              // hide "["
+              const textStart = node.from + 1;
+              const textEnd   = node.from + 1 + link.display.length;
+              const r1 = hideDeco.range(node.from, textStart);
+              inlineRanges.push(r1);
+              atomicRanges.push(r1);
+              // mark only the visible display text
+              if (textStart < textEnd) {
+                inlineRanges.push(
+                  Decoration.mark({ class: 'fr-lp-link' }).range(textStart, textEnd)
+                );
+              }
+              // hide "](url)"
+              if (textEnd < node.to) {
+                const r3 = hideDeco.range(textEnd, node.to);
+                inlineRanges.push(r3);
+                atomicRanges.push(r3);
+              }
             }
-            return false; // children already consumed by the replacement
+            return false; // don't visit children
           } else {
-            // Active line: show raw markdown styled in accent colour.
+            // Active line: show raw markdown with link colour + ghost children
             inlineRanges.push(
               Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
             );
-            // fall through → children visited so LinkMark/URL get ghost marks
           }
           return;
         }
