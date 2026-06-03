@@ -23,16 +23,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
 
-      - name: Build + package (Windows)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Uncomment + add secrets to sign:
-          # CSC_LINK:          ${{ secrets.WIN_CSC_LINK }}
-          # CSC_KEY_PASSWORD:  ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        run: npx electron-vite build && npx electron-builder --win --publish always
 
       - name: Upload installer artifacts
         uses: actions/upload-artifact@v4
@@ -56,10 +47,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
 
-      - name: Build + package (macOS)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Uncomment + add secrets for notarization:
@@ -93,13 +81,7 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
 
-      - name: Build + package (Linux)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-vite build && npx electron-builder --linux --publish always
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4

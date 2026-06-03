@@ -8,6 +8,9 @@ files:
   - out/**/*
   - package.json
 extraResources:
+  # dlgo AI inference binaries — only included when the ../dlgo-bin/ directory
+  # exists alongside the project root.  The app works without them; the AI
+  # panel simply shows "model server not found" until the binaries are present.
   - from: ../dlgo-bin/
     to: .
     filter:
