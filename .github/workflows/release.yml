@@ -12,9 +12,6 @@ jobs:
   # ── Windows ──────────────────────────────────────────────────────────────────
   build-win:
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: framora
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,16 +38,13 @@ jobs:
         with:
           name: windows-dist
           path: |
-            framora/dist/*.exe
-            framora/dist/latest.yml
+            dist/*.exe
+            dist/latest.yml
           retention-days: 7
 
   # ── macOS ────────────────────────────────────────────────────────────────────
   build-mac:
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: framora
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,17 +70,14 @@ jobs:
         with:
           name: macos-dist
           path: |
-            framora/dist/*.dmg
-            framora/dist/*.zip
-            framora/dist/latest-mac.yml
+            dist/*.dmg
+            dist/*.zip
+            dist/latest-mac.yml
           retention-days: 7
 
   # ── Linux ────────────────────────────────────────────────────────────────────
   build-linux:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: framora
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -112,7 +103,7 @@ jobs:
         with:
           name: linux-dist
           path: |
-            framora/dist/*.AppImage
-            framora/dist/*.deb
-            framora/dist/latest-linux.yml
+            dist/*.AppImage
+            dist/*.deb
+            dist/latest-linux.yml
           retention-days: 7
