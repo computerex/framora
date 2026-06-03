@@ -21,6 +21,7 @@ extraResources:
 asarUnpack:
   - resources/**
 
+# ── File associations ────────────────────────────────────────────────────────
 fileAssociations:
   - ext: md
     name: Markdown Document
@@ -42,6 +43,20 @@ fileAssociations:
     name: Quarto Markdown
     role: Editor
 
+# ── Auto-update (GitHub Releases) ───────────────────────────────────────────
+# electron-updater downloads latest.yml from the release and applies delta
+# updates.  Set GH_TOKEN env var when running `npm run release` to allow
+# electron-builder to upload the artifacts.
+publish:
+  provider: github
+  owner: computerex
+  repo: framora
+  releaseType: release
+  # publishAutoUpdate publishes latest.yml alongside the installer so that
+  # installed copies know a new version is available.
+  publishAutoUpdate: true
+
+# ── macOS ────────────────────────────────────────────────────────────────────
 mac:
   category: public.app-category.productivity
   icon: resources/icon.icns
@@ -52,9 +67,14 @@ mac:
       arch: [x64, arm64]
   hardenedRuntime: true
   gatekeeperAssess: false
+  notarize: false        # set to true + add APPLE_* env vars to enable
 
+# ── Windows ──────────────────────────────────────────────────────────────────
 win:
   icon: resources/icon.ico
+  # Uncomment + set CSC_LINK / CSC_KEY_PASSWORD env vars to sign:
+  # certificateFile: ${env.CSC_LINK}
+  # certificatePassword: ${env.CSC_KEY_PASSWORD}
   target:
     - target: nsis
       arch: [x64, arm64, ia32]
@@ -63,12 +83,21 @@ win:
 
 nsis:
   oneClick: false
-  perMachine: false
+  perMachine: false              # per-user by default; no elevation required
+  allowElevation: true           # user can elevate to install machine-wide
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Framora
+  # Custom installer page: "Set as default Markdown viewer" checkbox
+  include: build/installer.nsh
+  # Ensure the installer shows a license page if resources/license.txt exists
+  # license: resources/license.txt
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+  deleteAppDataOnUninstall: false
 
+# ── Linux ────────────────────────────────────────────────────────────────────
 linux:
   icon: resources/icons
   category: Office
@@ -80,7 +109,3 @@ linux:
       arch: [x64, arm64]
     - target: tar.gz
       arch: [x64, arm64]
-
-publish:
-  provider: github
-  releaseType: release
