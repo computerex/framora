@@ -9,25 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  # ── Create the GitHub Release first so all build jobs upload to the same one ─
-  create-release:
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create.outputs.upload_url }}
-    steps:
-      - name: Create GitHub Release
-        id: create
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   # ── Windows ──────────────────────────────────────────────────────────────────
   build-win:
-    needs: create-release
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -41,27 +24,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create empty dlgo-bin stub (AI binaries shipped separately)
+      - name: Create empty dlgo-bin stub
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path ..\dlgo-bin | Out-Null
 
-      - name: Build + package (Windows)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-vite build && npx electron-builder --win --publish always
+      - name: Build
+        run: npx electron-vite build && npx electron-builder --win --publish never
 
-      - name: Upload installer artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows-dist
-          path: |
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
             dist/*.exe
             dist/latest.yml
-          retention-days: 7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── macOS ────────────────────────────────────────────────────────────────────
   build-mac:
-    needs: create-release
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -78,24 +61,24 @@ jobs:
       - name: Create empty dlgo-bin stub
         run: mkdir -p ../dlgo-bin
 
-      - name: Build + package (macOS)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-vite build && npx electron-builder --mac --publish always
+      - name: Build
+        run: npx electron-vite build && npx electron-builder --mac --publish never
 
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: macos-dist
-          path: |
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
             dist/*.dmg
             dist/*.zip
             dist/latest-mac.yml
-          retention-days: 7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── Linux ────────────────────────────────────────────────────────────────────
   build-linux:
-    needs: create-release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -112,17 +95,18 @@ jobs:
       - name: Create empty dlgo-bin stub
         run: mkdir -p ../dlgo-bin
 
-      - name: Build + package (Linux)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-vite build && npx electron-builder --linux --publish always
+      - name: Build
+        run: npx electron-vite build && npx electron-builder --linux --publish never
 
-      - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: linux-dist
-          path: |
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
             dist/*.AppImage
             dist/*.deb
             dist/latest-linux.yml
-          retention-days: 7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
