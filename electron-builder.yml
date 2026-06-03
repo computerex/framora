@@ -55,8 +55,6 @@ publish:
   owner: computerex
   repo: framora
   releaseType: release
-  draft: false
-  prerelease: false
   # publishAutoUpdate publishes latest.yml alongside the installer so that
   # installed copies know a new version is available.
   publishAutoUpdate: true
