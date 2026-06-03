@@ -39,7 +39,7 @@ const inlineClass: Record<string, string> = {
   Emphasis: 'fr-lp-em',
   InlineCode: 'fr-lp-code',
   Strikethrough: 'fr-lp-strike',
-  Link: 'fr-lp-link'
+  // Link is handled explicitly below (widget replacement when inactive)
 };
 
 /** Mark nodes whose marker tokens (HeaderMark / EmphasisMark / CodeMark / LinkMark / etc.) should be hidden. */
@@ -232,6 +232,56 @@ function collectTableLines(
   return { lines: out, aligns, columns };
 }
 
+// ---------- Link widget ----------
+
+/**
+ * Replaces a `[text](url)` span with a rendered anchor element when the
+ * cursor is not on the link's line.  Clicking opens the URL via Electron's
+ * shell.openExternal so it always opens in the default browser.
+ */
+class LinkWidget extends WidgetType {
+  constructor(readonly display: string, readonly href: string) {
+    super();
+  }
+
+  eq(other: WidgetType): boolean {
+    return (
+      other instanceof LinkWidget &&
+      other.display === this.display &&
+      other.href === this.href
+    );
+  }
+
+  toDOM(): HTMLElement {
+    const a = document.createElement('a');
+    a.className = 'fr-lp-link-widget';
+    a.textContent = this.display;
+    a.title = this.href;
+    a.setAttribute('data-href', this.href);
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (this.href) void window.framora.openExternal(this.href);
+    });
+    return a;
+  }
+
+  ignoreEvent(): boolean {
+    return false; // allow click events
+  }
+}
+
+/** Extract display text and href from a `[text](url)` source string. */
+function parseLinkSrc(src: string): { display: string; href: string } | null {
+  // Match [display](href) — href may contain parens if balanced, but we take
+  // the simplest greedy approach: first `)` that closes the `(`.
+  const m = src.match(/^\[([^\]]*)\]\(([^)]*)\)/);
+  if (!m) return null;
+  // Strip optional title: `url "title"` → `url`
+  const href = m[2].trim().replace(/\s+"[^"]*"$/, '').trim();
+  return { display: m[1], href };
+}
+
 // ---------- Decoration builder ----------
 
 interface BuiltDecorations {
@@ -307,6 +357,32 @@ function buildDecorations(view: EditorView): BuiltDecorations {
             inlineRanges.push(
               Decoration.mark({ class: inlineClass[name] }).range(node.from, node.to)
             );
+          }
+          return;
+        }
+
+        // ---- Links: widget when inactive, raw + ghost when active ----
+        if (name === 'Link') {
+          if (!isActiveLine(node.from)) {
+            // Replace the entire [text](url) span with a rendered anchor.
+            // Using a widget replacement avoids the CM6 overlap issue where
+            // mixing mark + replace decorations on the same range silently
+            // discards the visible text.
+            const src = view.state.doc.sliceString(node.from, node.to);
+            const link = parseLinkSrc(src);
+            if (link) {
+              inlineRanges.push(
+                Decoration.replace({ widget: new LinkWidget(link.display, link.href) })
+                  .range(node.from, node.to)
+              );
+            }
+            return false; // children already consumed by the replacement
+          } else {
+            // Active line: show raw markdown styled in accent colour.
+            inlineRanges.push(
+              Decoration.mark({ class: 'fr-lp-link' }).range(node.from, node.to)
+            );
+            // fall through → children visited so LinkMark/URL get ghost marks
           }
           return;
         }
@@ -455,6 +531,13 @@ export const livePreviewTheme = EditorView.theme({
     fontSize: '0.9em'
   },
   '.fr-lp-link': { color: 'var(--fr-accent)' },
+  '.fr-lp-link-widget': {
+    color: 'var(--fr-accent)',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    fontSize: 'inherit'
+  },
   '.fr-lp-ghost': { color: 'var(--fr-fg-muted)', opacity: '0.55' },
   '.fr-lp-fenced': {
     fontFamily: 'var(--fr-font-mono)',
