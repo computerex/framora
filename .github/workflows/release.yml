@@ -9,8 +9,25 @@ permissions:
   contents: write
 
 jobs:
+  # ── Create the GitHub Release first so all build jobs upload to the same one ─
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create.outputs.upload_url }}
+    steps:
+      - name: Create GitHub Release
+        id: create
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # ── Windows ──────────────────────────────────────────────────────────────────
   build-win:
+    needs: create-release
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -44,6 +61,7 @@ jobs:
 
   # ── macOS ────────────────────────────────────────────────────────────────────
   build-mac:
+    needs: create-release
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -77,6 +95,7 @@ jobs:
 
   # ── Linux ────────────────────────────────────────────────────────────────────
   build-linux:
+    needs: create-release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
