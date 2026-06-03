@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "Framora — a clean, hybrid live-preview Markdown editor",
   "main": "out/main/index.js",
-  "author": "Framora",
+  "author": {
+    "name": "Framora",
+    "email": "support@framora.app"
+  },
   "license": "MIT",
   "private": true,
   "scripts": {

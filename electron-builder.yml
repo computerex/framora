@@ -105,6 +105,7 @@ linux:
   icon: resources/icons
   category: Office
   synopsis: A clean, hybrid live-preview Markdown editor
+  maintainer: Framora <support@framora.app>
   target:
     - target: AppImage
       arch: [x64, arm64]
