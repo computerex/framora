@@ -374,32 +374,70 @@ html, body, #root {
 .fr-recent-path { font-size: 11px; color: var(--fr-fg-muted); }
 
 /* ---------- Update bar ---------- */
+/* ---------- Auto-update banner ---------- */
 .fr-update-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 6px 16px;
-  background: var(--fr-accent);
-  color: #fff;
-  font-size: 13px;
+  gap: 10px;
+  padding: 5px 16px;
+  font-size: 12.5px;
   font-weight: 500;
   user-select: none;
+  flex-shrink: 0;
 }
-.fr-update-bar .fr-btn {
+.fr-update-bar--progress {
+  background: #2a2c30;
+  color: rgba(255,255,255,0.85);
+}
+.fr-update-bar--ready {
+  background: #1a6b3a;
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.4);
-  padding: 3px 12px;
+}
+.fr-update-bar__icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+/* inline progress track */
+.fr-update-bar__track {
+  flex: 1;
+  max-width: 140px;
+  height: 3px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.fr-update-bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--fr-accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+/* CTA button */
+.fr-update-bar__cta {
+  margin-left: 4px;
+  padding: 2px 12px;
   font-size: 12px;
-}
-.fr-update-bar .fr-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-.fr-update-bar .fr-btn.primary {
   background: #fff;
-  color: var(--fr-accent);
-  border-color: #fff;
+  color: #1a6b3a;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
 }
+.fr-update-bar__cta:hover { background: #e8f5ee; }
+/* dismiss X */
+.fr-update-bar__dismiss {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.fr-update-bar__dismiss:hover { color: #fff; }
 
 /* ---------- Split mode (editor left, preview right) ---------- */
 .workspace.mode-split {

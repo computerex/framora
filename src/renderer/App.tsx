@@ -398,24 +398,38 @@ body { margin: 0; padding: 24px 32px; font-family: -apple-system, BlinkMacSystem
   return (
     <I18nProvider value={messages}>
     <div className={`framora-root ${focusMode ? 'focus-mode' : ''}`}>
-      {updateStatus.state === 'available' && (
-        <div className="fr-update-bar">
-          Update {updateStatus.version} available
-          <button className="fr-btn" onClick={() => void window.framora.updaterDownload()}>
-            Download
-          </button>
-        </div>
-      )}
-      {updateStatus.state === 'downloading' && (
-        <div className="fr-update-bar">
-          Downloading update… {updateStatus.percent ?? 0}%
+      {(updateStatus.state === 'available' || updateStatus.state === 'downloading') && (
+        <div className="fr-update-bar fr-update-bar--progress">
+          <span className="fr-update-bar__icon">↓</span>
+          {updateStatus.state === 'available'
+            ? `Framora ${updateStatus.version ?? ''} — downloading update…`
+            : `Downloading update ${updateStatus.version ?? ''}… ${updateStatus.percent ?? 0}%`}
+          {updateStatus.state === 'downloading' && (
+            <span className="fr-update-bar__track">
+              <span
+                className="fr-update-bar__fill"
+                style={{ width: `${updateStatus.percent ?? 0}%` }}
+              />
+            </span>
+          )}
         </div>
       )}
       {updateStatus.state === 'ready' && (
-        <div className="fr-update-bar">
-          Update ready
-          <button className="fr-btn primary" onClick={() => void window.framora.updaterInstall()}>
+        <div className="fr-update-bar fr-update-bar--ready">
+          <span className="fr-update-bar__icon">✓</span>
+          Framora {updateStatus.version ?? ''} is ready to install
+          <button
+            className="fr-btn fr-update-bar__cta"
+            onClick={() => void window.framora.updaterInstall()}
+          >
             Restart &amp; Install
+          </button>
+          <button
+            className="fr-update-bar__dismiss"
+            onClick={() => setUpdateStatus({ state: 'idle' })}
+            title="Dismiss (installs on next restart)"
+          >
+            ✕
           </button>
         </div>
       )}
