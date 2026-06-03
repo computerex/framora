@@ -19,12 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: framora/package-lock.json
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -57,12 +55,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: framora/package-lock.json
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -95,12 +91,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: framora/package-lock.json
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
